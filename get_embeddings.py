@@ -46,6 +46,7 @@ if __name__ == "__main__":
         save_dir=save_dir, 
         dimension=args.dim
     )
+    client.load_embeddings()
 
     progress_path = os.path.join("temp_progress", data_name, "embedding_progress_index.json")
     index = load_json(progress_path) if os.path.exists(progress_path) else {"corpus": 0, "entity": 0, "graph": 0, "bs": args.bs}
@@ -55,14 +56,22 @@ if __name__ == "__main__":
     batches: List[List[str]] = chunk_to_batch_no_position(chunks, batch_size)
     get_embeddings(batches, client, index, progress_path, "corpus")
 
-    # entity of questions
-    question_with_entities: List[Dict] = load_json(os.path.join(data_dir, "question_with_entities.json"))
-    entities: List[str] = []
+    # entities and questions
+    if data_name.lower() == "quality":
+        raw_data = load_json(os.path.join(data_dir, "question_with_entities.json"))
+        question_with_entities: List[Dict] = []
+        for data in raw_data:
+            question_with_entities.extend(data["quetions"])
+    else:
+        question_with_entities: List[Dict] = load_json(os.path.join(data_dir, "question_with_entities.json"))
+    texts: List[str] = []
     for qdata in question_with_entities:
         q_entities: List[str] = [e["name"] for e in qdata["entities"]]
-        entities.extend(q_entities)
+        texts.extend(q_entities)
+        texts.append(qdata["question"])
+    texts: List[str] = list(set(texts))
     
-    batches: List[List[str]] = split_into_batches(entities, batch_size)
+    batches: List[List[str]] = split_into_batches(texts, batch_size)
     get_embeddings(batches, client, index, progress_path, "entity")
 
     # node name in graph

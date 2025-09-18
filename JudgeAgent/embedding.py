@@ -15,25 +15,29 @@ DEFAULT_EMBEDDING_DIMENSION = 1024
 
 class EmbeddingClient:
     def __init__(self, 
-        params: LLMParams, 
-        save_dir: str,  
+        save_dir: str, 
+        params: LLMParams = None,  
         dimension: int = DEFAULT_EMBEDDING_DIMENSION, 
     ) -> None:
-        self.client = LLMClient(params)
         self.dimension = dimension
         self.save_dir = save_dir
         os.makedirs(save_dir, exist_ok=True)
+
+        if params is not None:
+            self.client = LLMClient(params)
+        else:
+            self.client = None
 
         self.embeddings: np.ndarray = None
         self.name_dict: Dict[str, int] = {}
         self.embeddings_num = 0
 
     def get_llm_params(self):
-        return self.client.get_llm_params()
+        return self.client.get_llm_params() if self.client is not None else None
     
     def load_embeddings(self, save_dir: str = None):
         save_dir = self.save_dir if save_dir is None else save_dir
-        if os.path.exists(save_dir):
+        if save_dir is not None and os.path.exists(save_dir):
             embedding_path = os.path.join(save_dir, "embeddings.npy")
             if os.path.exists(embedding_path):
                 self.embeddings: np.ndarray = np.load(embedding_path)
@@ -78,6 +82,8 @@ class EmbeddingClient:
             embeddings[old_idxs] = self.embeddings[old_embed_idxs]
         
         if new_idxs:
+            if self.client is None:
+                raise Exception("Please provide parameters of LLMs before using EmbedddingClient to get new embeddings.")
             float_embeddings: List[List[float]] = []
             for idx in range(0, len(inputs), batch_size):
                 batch = new_texts[idx : idx+batch_size]

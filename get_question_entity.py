@@ -29,15 +29,32 @@ if __name__ == "__main__":
     with tqdm(total=len(questions), desc="label entity on question") as pbar:
         index = len(question_with_entities)
         pbar.update(index)
-        for qdata in questions[index : ]:
-            question, area = qdata["question"], qdata["area"]
-            labeled_entities = label_entity_for_texts([question], client, area, language=language)
-            entities = labeled_entities[0]
 
-            question_with_entities.append({**qdata, **{"entities": entities}})
+        if data_name.lower() == "quality":
+            for qdata in questions[index : ]:
+                new_questions = []
+                for q in qdata["questions"]:
+                    question, area = q["question"], q["area"]
+                    labeled_entities = label_entity_for_texts([question], client, area, language=language)
+                    entities = labeled_entities[0]
 
-            pbar.update(1)
-            index += 1
-            dump_json(question_with_entities, save_path)
-    
-    dump_json(question_with_entities, save_path)
+                    new_questions.append({**q, **{"entities": entities}})
+                
+                question_with_entities.append({
+                    "quetions": new_questions, 
+                    "article": qdata["article"]
+                })
+                index += 1
+                dump_json(question_with_entities, save_path)
+                pbar.update(1)
+        else:
+            for qdata in questions[index : ]:
+                question, area = qdata["question"], qdata["area"]
+                labeled_entities = label_entity_for_texts([question], client, area, language=language)
+                entities = labeled_entities[0]
+
+                question_with_entities.append({**qdata, **{"entities": entities}})
+
+                index += 1
+                dump_json(question_with_entities, save_path)
+                pbar.update(1)
