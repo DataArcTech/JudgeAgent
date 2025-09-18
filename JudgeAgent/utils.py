@@ -4,6 +4,7 @@ from typing import List, Dict, Tuple
 
 
 
+
 # load and save files
 ### json
 def load_json(path: str):
@@ -75,3 +76,18 @@ def chunk_to_batch_no_position(chunks: List[Dict], batch_size: int = 10) -> List
 def split_into_batches(arrays: List, batch_size: int = 10) -> List[List]:
     batches: List[List] = [arrays[idx : idx+batch_size] for idx in range(0, len(arrays), batch_size)]
     return batches
+
+
+# class of corpus
+class Corpus:
+    def __init__(self, corpus_path: str) -> None:
+        self.corpus_path = corpus_path
+        self.corpus = self._load_data(corpus_path)
+
+    def _load_data(self, corpus_path: str) -> List[List[str]]:
+        jsonl_data = load_jsonl(corpus_path)
+        corpus_data = [d["chunks"] for d in jsonl_data]
+        return corpus_data
+
+    def idx_to_chunk(self, chunk_id: Tuple[int, int]) -> str:
+        return self.corpus[chunk_id[0]][chunk_id[1]]

@@ -32,19 +32,22 @@ class EmbeddingClient:
         self.name_dict: Dict[str, int] = {}
         self.embeddings_num = 0
 
+        self.load_embeddings()
+
     def get_llm_params(self):
         return self.client.get_llm_params() if self.client is not None else None
     
     def load_embeddings(self, save_dir: str = None):
-        save_dir = self.save_dir if save_dir is None else save_dir
-        if save_dir is not None and os.path.exists(save_dir):
-            embedding_path = os.path.join(save_dir, "embeddings.npy")
-            if os.path.exists(embedding_path):
-                self.embeddings: np.ndarray = np.load(embedding_path)
-                self.name_dict: Dict[str, int] = load_json(os.path.join(save_dir, "name_dict.json"))
-                self.dimension = self.embeddings.shape[-1]
-                self.embeddings_num: int = self.embeddings.shape[0]
-        print(f"# Load Embeddings: Num={self.embeddings_num} , Dimension={self.dimension}")
+        if self.embeddings is None:
+            save_dir = self.save_dir if save_dir is None else save_dir
+            if save_dir is not None and os.path.exists(save_dir):
+                embedding_path = os.path.join(save_dir, "embeddings.npy")
+                if os.path.exists(embedding_path):
+                    self.embeddings: np.ndarray = np.load(embedding_path)
+                    self.name_dict: Dict[str, int] = load_json(os.path.join(save_dir, "name_dict.json"))
+                    self.dimension = self.embeddings.shape[-1]
+                    self.embeddings_num: int = self.embeddings.shape[0]
+            print(f"# Load Embeddings: Num={self.embeddings_num} , Dimension={self.dimension}")
         return self.embeddings_num
 
     def save_embeddings(self, save_dir: str = None):

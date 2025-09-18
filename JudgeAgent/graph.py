@@ -131,6 +131,8 @@ class Graph:
             raise Exception("The directory for saving graph is None.")
         os.makedirs(save_dir, exist_ok=True)
 
+        self.load_graph()
+
     def __getitem__(self, name: str) -> Node:
         return self.graph[name] if name in self.graph else None
 
@@ -150,15 +152,16 @@ class Graph:
             current_id += 1
     
     def load_graph(self, save_path: str = None):
-        save_path = os.path.join(self.save_dir, "graph.jsonl") if save_path is None else save_path
-        if os.path.exists(save_path):
-            with open(save_path, "r", encoding="utf-8") as fr:
-                for line in fr:
-                    if line:
-                        data = json.loads(line.strip())
-                        name = data["name"]
-                        node = Node.from_dict(data)
-                        self.graph[name] = node
+        if len(self.graph) == 0:
+            save_path = os.path.join(self.save_dir, "graph.jsonl") if save_path is None else save_path
+            if os.path.exists(save_path):
+                with open(save_path, "r", encoding="utf-8") as fr:
+                    for line in fr:
+                        if line:
+                            data = json.loads(line.strip())
+                            name = data["name"]
+                            node = Node.from_dict(data)
+                            self.graph[name] = node
 
     def save_graph(self, save_path: str = None):
         if save_path is None:

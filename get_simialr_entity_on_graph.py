@@ -18,12 +18,10 @@ if __name__ == "__main__":
     # load data
     data_dir = os.path.join("processed_data", data_name)
     graph = Graph(data_dir)
-    graph.load_graph()
 
     question_with_entities: List[Dict] = load_json(os.path.join(data_dir, "question_with_entities.json"))
 
     client = EmbeddingClient(save_dir=os.path.join(data_dir, "embeddings"))
-    client.load_embeddings()
     print("# Finish Load Graph and Embeddings")
 
     # find the most similar entities on graph

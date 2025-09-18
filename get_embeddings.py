@@ -46,7 +46,6 @@ if __name__ == "__main__":
         save_dir=save_dir, 
         dimension=args.dim
     )
-    client.load_embeddings()
 
     progress_path = os.path.join("temp_progress", data_name, "embedding_progress_index.json")
     index = load_json(progress_path) if os.path.exists(progress_path) else {"corpus": 0, "entity": 0, "graph": 0, "bs": args.bs}
@@ -76,7 +75,6 @@ if __name__ == "__main__":
 
     # node name in graph
     graph = Graph(data_dir)
-    graph.load_graph()
     node_list = graph.get_node_list()
     batches: List[List[str]] = split_into_batches(node_list, batch_size)
     get_embeddings(batches, client, index, progress_path, "graph")
