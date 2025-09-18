@@ -33,10 +33,7 @@ def split_chunks_MedQA(data_dir: str, save_dir: str):
     
     dump_jsonl(all_corpus, os.path.join(save_dir, "corpus_chunks.jsonl"))
 
-def process_questions_MedQA(question_path: str, save_dir: str):
-    if not os.path.exists(question_path):
-        raise Exception(f"{question_path} doesn't exist.")
-    
+def process_questions_MedQA(question_path: str, save_dir: str):    
     raw_questions: List[Dict] = load_jsonl(question_path)
     questions: List[Dict] = []
     for q in raw_questions:
@@ -138,5 +135,25 @@ def process_data_QuALITY(data_dir: str, save_dir: str):
     dump_json(questions, os.path.join(save_dir, "questions.json"))
 
 
+
+
+
 if __name__ == "__main__":
-    pass
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data", type=str, default="MedQA")
+    args = parser.parse_args()
+    data_name: str = args.data
+
+    data_dir = os.path.join("data", data_name)
+    save_dir = os.path.join("processed_data", data_name)
+    if data_name.lower() == "medqa":
+        split_chunks_MedQA(data_dir, save_dir)
+        process_questions_MedQA(os.path.join(data_dir, "questions", "US", "4_options", "phrases_no_exclude_test.jsonl"), save_dir)
+    elif data_name.lower() == "multihoprag":
+        split_chunks_MultiHopRAG(data_dir, save_dir)
+        process_questions_MultiHopRAG(os.path.join(data_dir, "MultiHopRAG.json"), save_dir)
+    elif data_name.lower() == "quality":
+        process_data_QuALITY(data_dir, save_dir)
+    else:
+        raise ValueError(f"The process of {data_name} is not supported now, please write the code yourself first.")
