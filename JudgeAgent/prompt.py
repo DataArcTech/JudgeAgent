@@ -180,7 +180,47 @@ Please generate a phrase-based Q&A question according to the above requirements,
 
 
 # Answer Question
-ANSWER_PROMPT_MC_TEMPLATE = {
+### answer questions
+ANSWER_PROMPT_MC = {
+    "Chinese": """
+完成下列单项选择题：
+{question}
+{options}
+请从上述选项中选择正确的一项，按照下列格式输出，其中<your choice>为选项的序号（A/B/C/D/……）：
+[Answer]: <your choice>
+""".strip(), 
+    "English": """
+Please complete the following multiple-choice question:
+{question}
+{options}
+The question has only one correct option. Please ONLY output the index (A/B/C/D) of the correct answer in the following JSON format:
+{{
+    "answer": "correct choice index"
+}}
+""".strip()
+}
+
+
+ANSWER_PROMPT_QA = {
+    "Chinese": """
+完成下列短语问答题：
+{question}
+请尽可能精简地使用一个词语或短语回答上述问题，按照下列格式输出：
+[Answer]: <your answer>
+""".strip(), 
+    "English": """
+Please complete the following phrase Q&A question:
+{question}
+Please answer the above question as minimally as possible using one word or phrase, in the following JSON format:
+{{
+    "answer": "Your answer"
+}}
+""".strip()
+}
+
+
+### Re-answer questions with suggestions from JudgeAgent
+REANSWER_PROMPT_MC = {
     "Chinese": """
 现有下列单项选择题：
 {question}
@@ -208,7 +248,7 @@ The question has only one correct option. Please consider the above suggestions,
 }
 
 
-ANSWER_PROMPT_QA_TEMPLATE = {
+REANSWER_PROMPT_QA = {
     "Chinese": """
 完成下列短语问答题：
 {question}
@@ -234,7 +274,7 @@ Please consider the above [suggestions], and answer the above [question] as mini
 }
 
 
-VALIDATE_PROMPT_TEMPLATE = {
+VALIDATE_PROMPT = {
     "Chinese": """
 下列是一个问题及其正确答案，以及一位受面试者对该问题的回答：
 [问题]：{question}
@@ -253,6 +293,51 @@ The following is a question with the correct answer, and the response of a canda
 With reference to [correct answer], is [candidate answer] correct for [question]? Please output only YES or NO in the following JSON format:
 {{
     "judge": <YES or NO>
+}}
+""".strip()
+}
+
+
+# Evaluation && Suggestions
+EVAL_SYSTEM_PROMPT = {
+    "Chinese": "你是一位面试官，需要根据学生在一连串问题中的回答表现，评定该学生的知识水平、能力层次。", 
+    "English": "You are an examiner who needs to assess the student's knowledge level and ability tier based on their performance in answering a sequence of questions."
+}
+
+
+EVALUATE_PROMPT = {
+    "Chinese": """
+以下是一名受面试者关于一道基础问题及其相关衍生问题的回答表现:
+[基础问答]: {base_question}
+
+[衍生问答列表]: [
+{addition_questions}
+]
+
+请根据上述表现，从以下角度用简洁语言对受访者的表现进行评估分析，并提供有助于LLM更好回答同类问题的建议。提供的改正建议应围绕逻辑思维步骤、必备知识及能力提供具体详细的指导，确保LLM能针对同类问题作出正确回答。
+按照如下JSON格式输出: 
+{{
+    "lack_of_knowledge": "是否存在知识方面的欠缺？若存在欠缺，需要补充哪些知识？", 
+    "lack_of_ability": "是否存在能力方面的欠缺？若存在欠缺，哪些能力需要加强？", 
+    "comprehensive_performance": "模型回答问题的综合表现", 
+    "suggestions": "能够帮助模型更好回答问题的建议。"
+}}
+""".strip(), 
+    "English": """
+The following is the performance of an LLM in answering a base question and its related derivative questions: 
+[base question]: {base_question}
+
+[derivative question list]: [
+{addition_questions}
+]
+
+Please evaluate and analyze the interviewee’s performance based on the above performance using concise language from the following perspectives, and provide suggestions that help the LLM answer the same questions better. Suggestions should provide specific and detailed guidance on logical thinking steps, required knowledge, and abilities, ensuring the LLM can answer correctly for the same questions.
+Output in the following JSON format:
+{{
+    "lack_of_knowledge": "The lack of background knowledge.", 
+    "lack_of_ability": "The flaws in logic and capability.", 
+    "comprehensive_performance": "The Comprehensive performance of all questions.", 
+    "suggestions": "Suggestions that help the LLM answer questions better."
 }}
 """.strip()
 }
