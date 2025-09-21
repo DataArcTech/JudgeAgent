@@ -82,7 +82,11 @@ def process_questions_MultiHopRAG(question_path: str, save_dir: str):
 
 
 # process QuALITY
-def process_data_QuALITY(data_dir: str, save_dir: str):
+def process_data_QuALITY(data_dir: str, save_dir: str, benchmarking_batch_size: int = 3):
+    """
+    Notice: "benchmarking_batch_size" is related to Benchmark Grading stage of JudgeAgent.
+    For QuALITY, we only sample a batch for each article.
+    """
     datas = load_json(os.path.join(data_dir, "data", "dev.json"))
     all_corpus = []
     all_questions = []
@@ -104,7 +108,9 @@ def process_data_QuALITY(data_dir: str, save_dir: str):
         article = article.replace("\n\n\n ", "##SPLIT##").replace("\nBy ", "##By##", 1).replace("\n", " ")
         article = re.sub(r"\s{2,}", " ", article)
         article = article.replace("##SPLIT##", "\n").replace("##By##", "\nBy ")
-        questions = []
+
+        total_question_num = 0
+        difficulty_questions_dict: Dict[str, List[Dict]] = {"easy": [], "medium": [], "hard": []}
         for q in d["questions"]:
             new_q = {"question": q["question"], "options": q["options"]}
             gold_label = q["gold_label"]
@@ -119,13 +125,34 @@ def process_data_QuALITY(data_dir: str, save_dir: str):
             else:
                 difficulty = "easy"
             new_q = {**new_q, **{"answer": gold_label-1, "difficulty": difficulty}}
-            questions.append({
+            difficulty_questions_dict[difficulty].append({
                 "question": q["question"], 
                 "options": {chr(ord("A")+i): o for i, o in enumerate(q["options"])}, 
                 "answer": chr(ord("A")+gold_label-1), 
                 "difficulty": difficulty, 
                 "area": area
             })
+            total_question_num += 1
+        
+        questions = []
+        if total_question_num < benchmarking_batch_size:
+            for d_questions in difficulty_questions_dict.values():
+                questions.extend(d_questions)
+        else:
+            qnum_in_each_difficulty = [benchmarking_batch_size // 3] * 3
+            for i in range(benchmarking_batch_size - 3*qnum_in_each_difficulty[0]):
+                qnum_in_each_difficulty[i] += 1
+            for i, difficulty in enumerate(["hard", "medium", "easy"]):
+                qnum = qnum_in_each_difficulty[i]
+                d_questions = difficulty_questions_dict[difficulty]
+                if qnum > len(d_questions):
+                    questions.extend(d_questions)
+                    if i < 2:
+                        qnum_in_each_difficulty[i+1] += qnum - len(d_questions)
+                else:
+                    random.shuffle(d_questions)
+                    questions.extend(d_questions[:qnum])
+
         all_questions.append({
             "questions": questions, 
             "article": article
@@ -142,8 +169,10 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default="MedQA")
+    parser.add_argument("--random_seed", type=int, default=42)
     args = parser.parse_args()
     data_name: str = args.data
+    set_random_seed(args.random_seed)
 
     data_dir = os.path.join("data", data_name)
     save_dir = os.path.join("processed_data", data_name)

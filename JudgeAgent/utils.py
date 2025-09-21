@@ -1,8 +1,16 @@
 import os
 import json
+import random
+import numpy as np
 from typing import List, Dict, Tuple
 
 
+
+# set random seed
+def set_random_seed(random_seed: int):
+    os.environ['PYTHONHASHSEED'] = str(random_seed)
+    random.seed(random_seed)
+    np.random.seed(random_seed)
 
 
 # load and save files

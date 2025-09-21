@@ -133,6 +133,7 @@ class GraphPathSampler:
         input_data: str, 
         save_dir: str, 
         embedding_client: EmbeddingClient, 
+        graph: Graph = None, 
         sample_max: int = 3, 
         sample_hop: int = 2, 
         enable_parallel: bool = True,
@@ -147,6 +148,7 @@ class GraphPathSampler:
         self.input_data = input_data
         self.corpus = Corpus(input_data)
         self.graph: Graph = None
+
         self.embedding_client = embedding_client
         self.sample_hop = max(1, sample_hop)
         self.similarity_threshold = similarity_threshold
@@ -183,15 +185,19 @@ class GraphPathSampler:
         self._save_counter = 0
 
         # load data
+        self.load_graph(graph)
+        self.load_similar_neighbors()
+        self.load_entity_similarity_matrix()
         
 
     def load_graph(self, graph: Graph) -> None:
-        self.graph = graph
-        
-        if self.enable_cache and not self.entity_sim_matrix:
-            entities = list(graph.get_node_list())
-            if len(entities) <= 1000:   # only preprocess for graph of small/medium scale
-                self.precompute_entity_similarities(entities)
+        if graph is not None:
+            self.graph = graph
+            
+            if self.enable_cache and not self.entity_sim_matrix:
+                entities = list(graph.get_node_list())
+                if len(entities) <= 1000:   # only preprocess for graph of small/medium scale
+                    self.precompute_entity_similarities(entities)
         
     def load_similar_neighbors(self) -> None:
         try:
