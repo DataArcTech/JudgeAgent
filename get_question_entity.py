@@ -14,10 +14,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default="MedQA")
     parser.add_argument("--model", type=str, default="gpt")
-    parser.add_argument("--lang", type=str, default="English")
     args = parser.parse_args()
     data_name: str = args.data
-    language: str = args.lang
 
     data_dir = os.path.join("processed_data", data_name)
     save_path = os.path.join(data_dir, "question_with_entities.json")
@@ -35,7 +33,7 @@ if __name__ == "__main__":
                 new_questions = []
                 for q in qdata["questions"]:
                     question, area = q["question"], q["area"]
-                    labeled_entities = label_entity_for_texts([question], client, area, language=language)
+                    labeled_entities = label_entity_for_texts([question], client, area)
                     entities = labeled_entities[0]
 
                     new_questions.append({**q, **{"entities": entities}})
@@ -50,7 +48,7 @@ if __name__ == "__main__":
         else:
             for qdata in questions[index : ]:
                 question, area = qdata["question"], qdata["area"]
-                labeled_entities = label_entity_for_texts([question], client, area, language=language)
+                labeled_entities = label_entity_for_texts([question], client, area)
                 entities = labeled_entities[0]
 
                 question_with_entities.append({**qdata, **{"entities": entities}})

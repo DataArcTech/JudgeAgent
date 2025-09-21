@@ -134,7 +134,7 @@ class GraphPathSampler:
         save_dir: str, 
         embedding_client: EmbeddingClient, 
         sample_max: int = 3, 
-        sample_hop: int = 1, 
+        sample_hop: int = 2, 
         enable_parallel: bool = True,
         enable_cache: bool = True,
         similarity_threshold: float = SIMILARITY_THRESHOLD,

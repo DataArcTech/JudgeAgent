@@ -46,7 +46,6 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default="MedQA")
-    parser.add_argument("--lang", type=str, default="English")
     parser.add_argument("--model", type=str, default="gpt")
     parser.add_argument("--bs", type=int, default=10)
     args = parser.parse_args()
@@ -73,7 +72,7 @@ if __name__ == "__main__":
         for batch_data in batches[index["index"] : ]:
             batch, area = batch_data["batch"], batch_data["area"]
 
-            temp_entity_dict = label_entity_for_batch(batch, client, area, batch_size=batch_size, language=args.lang)
+            temp_entity_dict = label_entity_for_batch(batch, client, area, batch_size=batch_size)
             entity_dict = refresh_entity_dict(entity_dict, temp_entity_dict)
 
             save_entity_dict(entity_dict, entity_dict_path)

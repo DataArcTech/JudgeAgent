@@ -25,7 +25,7 @@ class LLMClient:
         get_res, try_cnt, error = False, 0, None
 
         if json_format:
-            kwargs["type"] = "json_object"
+            kwargs["response_format"] = {"type": "json_object"}
 
         while not get_res and try_cnt < 3:
             try_cnt += 1
@@ -57,11 +57,11 @@ class LLMClient:
                 raise Exception("try to max.")
 
         if get_res and not res.startswith("[ERROR]"):
-            res = res.strip()
             if res.startswith("```json"):
                 res = res[7:]
             if res.endswith("```"):
                 res = res[:-3]
+            res = res.strip()
             
         return res
 
