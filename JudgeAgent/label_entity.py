@@ -75,7 +75,7 @@ def label_entity_for_texts(
                     for e in d["entity_list"]:
                         if "entity_text" in e:
                             ename = e["entity_text"]
-                            etype = e["entity_type"] if "entity_type" in e else ""
+                            etype = e.get("entity_type", "") 
                             entities.append({"name": ename, "type": etype})
                     labeled_entities_all.append(entities)
         except Exception as e:

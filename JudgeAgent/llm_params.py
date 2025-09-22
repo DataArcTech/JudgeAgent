@@ -8,10 +8,12 @@ class LLMParams:
         api_key: str, 
         base_url: str, 
         model: str, 
+        json_format: bool = True
     ) -> None:
         self.api_key = api_key
         self.base_url = base_url
         self.model = model
+        self.json_format = json_format
 
 
 MODEL_PARAMS = {
@@ -40,6 +42,7 @@ MODEL_PARAMS = {
     "qwen3-embedding": LLMParams(
         api_key="YOUR API KEY", 
         base_url="https://dashscope.aliyuncs.com/compatible-mode/v1", 
-        model="text-embedding-v4"
+        model="text-embedding-v4", 
+        json_format=False
     ),
 }

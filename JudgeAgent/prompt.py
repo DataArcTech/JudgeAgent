@@ -80,7 +80,7 @@ Please generate a multiple-choice question according to the above requirements, 
 
 # prompt for synthetising phrase question-answer (QA) questions on graph
 # args: difficulty (rules from DIFFICULTY), example, context
-SOG_PROMPT_SIMPLE_QA = """
+SOG_PROMPT_QA = """
 As an interviewer, you are tasked with designing phrase-based Q&A style questions based on the provided articles. Your role involves crafting questions, relevant options, and correct answers that fulfill the following criteria:
 
 1. **Focus on the Entity**: Ensure all questions consistently center around the specified entity from the article. 
@@ -141,7 +141,7 @@ Please generate a multiple-choice question according to the above requirements, 
 # prompt for synthetising phrase question-answer (QA) questions on graph
 # allowing for synthetising all questions with all difficulty levels.
 # args: example, context
-SOG_FULL_DIFFICULTY_PROMPT_SIMPLE_QA = """
+SOG_FULL_DIFFICULTY_PROMPT_QA = """
 As an interviewer, you are tasked with designing phrase-based Q&A style questions based on the provided articles. Your role involves crafting questions, relevant options, and correct answers that fulfill the following criteria:
 
 1. **Focus on the Entity**: Ensure all questions consistently center around the specified entity from the article. 
@@ -168,58 +168,131 @@ Please generate a phrase-based Q&A question according to the above requirements,
 
 # Answer Question
 # prompt for answering multiple-choice questions
-# args: question, options
+# args: questions
 ANSWER_PROMPT_MC = """
 Please complete the following multiple-choice question:
-{question}
-{options}
-The question has only one correct option. Please ONLY output the index (A/B/C/D) of the correct answer in the following JSON format:
+[questions]: [
+{questions}
+]
+
+The question has only one correct option. Please ONLY output the index (A/B/C/D) of the correct answer for each question in [questions].
+Please output in the following JSON format:
 {{
-    "answer": "correct choice index"
+    "response": [
+        {{"answer": "choice of question 1"}}, 
+        {{"answer": "choice of question 2"}}, 
+        ...
+    ]
 }}
 """.strip()
 
 # prompt for answering phrase Q&A questions
-# args: question
+# args: questions
 ANSWER_PROMPT_QA = """
-Please complete the following phrase Q&A question:
-{question}
-Please answer the above question as minimally as possible using one word or phrase, in the following JSON format:
+Please complete the following phrase Q&A questions:
+[questions]: [
+{questions}
+]
+
+Please answer each question in [questions] as minimally as possible using one word or phrase.
+Please output in the following JSON format:
 {{
-    "answer": "Your answer"
+    "response": [
+        {{"answer": "answer of question 1"}}, 
+        {{"answer": "answer of question 2"}}, 
+        ...
+    ]
+}}
+""".strip()
+
+# prompt for answering multiple-choice questions with backgroun article (mainly assess the reasoning and comphrension capability)
+# args: article, questions
+ANSWER_PROMPT_RMC = """
+Please answer some multiple-choice style questions based on the following provided article:
+
+{article}
+
+Please answer the following multiple-choice questions based on the above article: [
+{questions}
+]
+
+Each question has only one correct option. Please ONLY output the index (A/B/C/D) of the correct answer for each question in the following JSON format:
+{{
+    "response": [
+        {{"answer": "choice of question 1"}}, 
+        {{"answer": "choice of question 2"}}, 
+        ...
+    ]
 }}
 """.strip()
 
 
 # Re-answer questions with suggestions from JudgeAgent
 # prompt for re-answer multiple-choice questions
-# args: question, options, suggestions
+# args: questions, suggestions
 REANSWER_PROMPT_MC = """
-Please complete the following multiple-choice question:
-{question}
-{options}
+Please complete the following multiple-choice questions:
+[questions]: [
+{questions}
+]
 
 In your previous responses to the question, the interviewer has provided the following suggestions for you to help you answer better:
 [suggestions]: {suggestions}
 
-The question has only one correct option. Please consider the above suggestions, and output the index (A/B/C/D) of the correct answer in the following JSON format:
+The question has only one correct option. Please consider the above suggestions, and ONLY output the index (A/B/C/D) of the correct answer for each question in [questions].
+Please output in the following JSON format:
 {{
-    "answer": "correct choice index"
+    "response": [
+        {{"answer": "choice of question 1"}}, 
+        {{"answer": "choice of question 2"}}, 
+        ...
+    ]
 }}
 """.strip()
 
 # prompt for re-answer phrase Q&A questions
-# args: question, suggestions
+# args: questions, suggestions
 REANSWER_PROMPT_QA = """
-Please complete the following phrase Q&A question:
-[question]: {question}
+Please complete the following phrase Q&A questions:
+[questions]: [
+{questions}
+]
 
 In previous responses to this question and related derivative questions, the interviewer has provided the following suggestions for you:
 [suggestions]: {suggestions}
 
-Please consider the above [suggestions], and answer the above [question] as minimally as possible using one word or phrase, in the following JSON format:
+Please consider the above [suggestions], and answer each question in [questions] as minimally as possible using one word or phrase.
+Please output in the following JSON format:
 {{
-    "answer": "Your answer"
+    "response": [
+        {{"answer": "answer of question 1"}}, 
+        {{"answer": "answer of question 2"}}, 
+        ...
+    ]
+}}
+""".strip()
+
+# prompt for re-answer multiple-choice questions with backgroun article (mainly assess the reasoning and comphrension capability)
+# args: article, questions, suggestions
+REANSWER_PROMPT_RMC = """
+Please answer some multiple-choice style questions based on the following provided article:
+
+{article}
+
+Please answer the following multiple-choice questions based on the above article: [
+{questions}
+]
+
+In your previous responses to these questions, the interviewer has provided the following suggestions for you to help you answer better:
+[suggestions]: {suggestions}
+
+Each question has only one correct option. Please consider the above suggestions, optimize your reasoning and analysis process, and output the index (A/B/C/D) of the correct answer for each question in the following JSON format:
+{{
+    "response": [
+        {{"answer": "choice of question 1"}}, 
+        {{"answer": "choice of question 2"}}, 
+        ...
+    ]
 }}
 """.strip()
 
@@ -264,3 +337,67 @@ Output in the following JSON format:
     "suggestions": "Suggestions that help the LLM answer questions better."
 }}
 """.strip()
+
+
+
+# Dictionary of mapping from QTYPE (question type) to prompt
+from enum import Enum
+from typing import Dict
+from .utils import QTYPE
+
+
+class PTYPE(Enum):
+    SOG = "sythetisis_on_graph"
+    SOG_FULL_DIFFICULTY = "sog_with_all_difficulty"
+    ANSWER = "answer"
+    REANSWER = "answer_with_suggestions"
+
+
+class PromptFiller:
+    def __init__(self) -> None:
+        self.prompt_dict = {
+            PTYPE.SOG: {
+                QTYPE.KMC: SOG_PROMPT_MC, 
+                QTYPE.KQA: SOG_PROMPT_QA, 
+                QTYPE.RMC: SOG_PROMPT_MC
+            }, 
+            PTYPE.SOG_FULL_DIFFICULTY: {
+                QTYPE.KMC: SOG_FULL_DIFFICULTY_PROMPT_MC, 
+                QTYPE.KQA: SOG_FULL_DIFFICULTY_PROMPT_QA, 
+                QTYPE.RMC: SOG_FULL_DIFFICULTY_PROMPT_MC
+            }, 
+            PTYPE.ANSWER: {
+                QTYPE.KMC: ANSWER_PROMPT_MC, 
+                QTYPE.KQA: ANSWER_PROMPT_QA, 
+                QTYPE.RMC: ANSWER_PROMPT_RMC
+            }, 
+            PTYPE.REANSWER: {
+                QTYPE.KMC: REANSWER_PROMPT_MC, 
+                QTYPE.KQA: REANSWER_PROMPT_QA, 
+                QTYPE.RMC: REANSWER_PROMPT_RMC
+            }
+        }
+        self.default_example_dict = {
+            QTYPE.KMC: DEFAULT_EXAMPLE_MC, 
+            QTYPE.KQA: DEFAULT_EXAMPLE_QA, 
+            QTYPE.RMC: ""
+        }
+
+    def fill(self, prompt_type: PTYPE, question_type: QTYPE, data: Dict) -> str:
+        prompt_template = self.prompt_dict[prompt_type][question_type]
+        if prompt_type in [PTYPE.SOG, PTYPE.SOG_FULL_DIFFICULTY]:
+            example = data.get("example", self.default_example_dict[question_type])
+            context = data["context"]
+            difficulty = data.get("difficulty", None)
+            prompt = prompt_template.format(difficulty=difficulty, example=example, context=context)
+        elif prompt_type in [PTYPE.ANSWER, PTYPE.REANSWER]:
+            article = data.get("article", None)
+            questions = data["questions"]
+            suggestions = data.get("suggestions", None)
+            prompt = prompt_template.format(article=article, question=questions, suggestions=suggestions)
+        else:
+            raise ValueError(f"Prompt of type {prompt_type} is not supported.")
+        
+        return prompt
+
+PROMPT_FILLER = PromptFiller()

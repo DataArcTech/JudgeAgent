@@ -12,6 +12,7 @@ class LLMClient:
         self.api_key = params.api_key
         self.base_url = params.base_url
         self.model = params.model
+        self.json_format = params.json_format
         self.client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url)
 
     def get_llm_params(self):
@@ -19,14 +20,14 @@ class LLMClient:
 
     def chat(self, 
         messages: List[Dict[str, str]], 
-        json_format: bool = True, 
         **kwargs   
-    ):
+    ) -> str:
         get_res, try_cnt, error = False, 0, None
 
-        if json_format:
+        if self.json_format:
             kwargs["response_format"] = {"type": "json_object"}
 
+        res = None
         while not get_res and try_cnt < 3:
             try_cnt += 1
             try:
@@ -58,9 +59,9 @@ class LLMClient:
 
         if get_res and not res.startswith("[ERROR]"):
             if res.startswith("```json"):
-                res = res[7:]
+                res: str = res[7:]
             if res.endswith("```"):
-                res = res[:-3]
+                res: str = res[:-3]
             res = res.strip()
             
         return res

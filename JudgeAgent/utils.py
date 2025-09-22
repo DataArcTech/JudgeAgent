@@ -3,6 +3,7 @@ import json
 import random
 import numpy as np
 from typing import List, Dict, Tuple
+from enum import Enum
 
 
 
@@ -87,6 +88,12 @@ def split_into_batches(arrays: List, batch_size: int = 10) -> List[List]:
 
 
 # class of corpus
+class QTYPE(Enum):
+    KMC = "knowledge_multiple_choice"   # MedQA, ...
+    KQA = "knowledge_phrase_qa"         # MultiHop-RAG, ...
+    RMC = "reasoning_multiple_choice"   # QuALITY, ...
+
+
 class Corpus:
     def __init__(self, corpus_path: str) -> None:
         self.corpus_path = corpus_path

@@ -134,10 +134,10 @@ class Graph:
         self.load_graph()
 
     def __getitem__(self, name: str) -> Node:
-        return self.graph[name] if name in self.graph else None
+        return self.graph.get(name, None)
 
     def get_node(self, name: str) -> Node:
-        return self.graph[name] if name in self.graph else None
+        return self.graph.get(name, None)
 
     def in_graph(self, name: str) -> bool:
         return name in self.graph
