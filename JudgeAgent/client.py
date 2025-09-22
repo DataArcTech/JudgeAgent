@@ -25,7 +25,7 @@ class LLMClient:
         get_res, try_cnt, error = False, 0, None
 
         if self.json_format:
-            kwargs["response_format"] = {"type": "json_object"}
+            kwargs = {**kwargs, **{"response_format": {"type": "json_object"}}}
 
         res = None
         while not get_res and try_cnt < 3:
@@ -44,7 +44,7 @@ class LLMClient:
                 if any([s in err_msg for s in ["You exceeded your current requests list", "您当前使用该API的并发数过高"]]):
                     time.sleep(30)
                     try_cnt = 1
-                elif any([s in err_msg for s in ["data_inspection_failed", "系统检测到输入或生成内容可能包含不安全或敏感内容"]]):
+                elif any([s in err_msg for s in ["data_inspection_failed", "系统检测到输入或生成内容可能包含不安全或敏感内容", "The response was filtered due to the prompt triggering Azure OpenAI's content management policy."]]):
                     time.sleep(5)
                     get_res = True
                     res = f"[ERROR]: {err_msg}"
@@ -57,14 +57,13 @@ class LLMClient:
             else:
                 raise Exception("try to max.")
 
-        if get_res and not res.startswith("[ERROR]"):
+        if self.json_format and not res.startswith("[ERROR]"):
             if res.startswith("```json"):
                 res: str = res[7:]
             if res.endswith("```"):
                 res: str = res[:-3]
-            res = res.strip()
             
-        return res
+        return res.strip()
 
     def get_embeddings(self, 
         inputs: List[str], 

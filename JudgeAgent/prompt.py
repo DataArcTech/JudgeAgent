@@ -171,11 +171,9 @@ Please generate a phrase-based Q&A question according to the above requirements,
 # args: questions
 ANSWER_PROMPT_MC = """
 Please complete the following multiple-choice question:
-[questions]: [
-{questions}
-]
+[questions]: [{questions}]
 
-The question has only one correct option. Please ONLY output the index (A/B/C/D) of the correct answer for each question in [questions].
+Each question has only one correct option. Please ONLY output the index (A/B/C/D) of the correct answer for each question in [questions].
 Please output in the following JSON format:
 {{
     "response": [
@@ -190,9 +188,7 @@ Please output in the following JSON format:
 # args: questions
 ANSWER_PROMPT_QA = """
 Please complete the following phrase Q&A questions:
-[questions]: [
-{questions}
-]
+[questions]: [{questions}]
 
 Please answer each question in [questions] as minimally as possible using one word or phrase.
 Please output in the following JSON format:
@@ -212,9 +208,7 @@ Please answer some multiple-choice style questions based on the following provid
 
 {article}
 
-Please answer the following multiple-choice questions based on the above article: [
-{questions}
-]
+Please answer the following multiple-choice questions based on the above article: [{questions}]
 
 Each question has only one correct option. Please ONLY output the index (A/B/C/D) of the correct answer for each question in the following JSON format:
 {{
@@ -232,9 +226,7 @@ Each question has only one correct option. Please ONLY output the index (A/B/C/D
 # args: questions, suggestions
 REANSWER_PROMPT_MC = """
 Please complete the following multiple-choice questions:
-[questions]: [
-{questions}
-]
+[questions]: [{questions}]
 
 In your previous responses to the question, the interviewer has provided the following suggestions for you to help you answer better:
 [suggestions]: {suggestions}
@@ -254,9 +246,7 @@ Please output in the following JSON format:
 # args: questions, suggestions
 REANSWER_PROMPT_QA = """
 Please complete the following phrase Q&A questions:
-[questions]: [
-{questions}
-]
+[questions]: [{questions}]
 
 In previous responses to this question and related derivative questions, the interviewer has provided the following suggestions for you:
 [suggestions]: {suggestions}
@@ -279,9 +269,7 @@ Please answer some multiple-choice style questions based on the following provid
 
 {article}
 
-Please answer the following multiple-choice questions based on the above article: [
-{questions}
-]
+Please answer the following multiple-choice questions based on the above article: [{questions}]
 
 In your previous responses to these questions, the interviewer has provided the following suggestions for you to help you answer better:
 [suggestions]: {suggestions}
@@ -320,13 +308,9 @@ DEFAULT_EVAL_SYSTEM_PROMPT = "You are an examiner who needs to assess the studen
 # args: base_questions, addition_questions
 EVALUATE_PROMPT = """
 The following is the performance of an LLM in answering base questions and their related derivative questions: 
-[base questions]: [
-{base_questions}
-]
+[base questions]: [{base_questions}]
 
-[derivative questions]: [
-{addition_questions}
-]
+[derivative questions]: [{addition_questions}]
 
 Please evaluate and analyze the interviewee’s performance based on the above performance using concise language from the following perspectives, and provide suggestions that help the LLM answer the same questions better. Suggestions should provide specific and detailed guidance on logical thinking steps, required knowledge, and abilities, ensuring the LLM can answer correctly for the same questions.
 Output in the following JSON format:
