@@ -254,6 +254,7 @@ class JudgeAgent:
         llm_client: LLMClient, 
         sampler: GraphPathSampler, 
         save_dir: str, 
+        result_path: str = None, 
         max_extend_rounds: int = 3, 
         benchmarking_batch_size: int = 3
     ) -> None:
@@ -268,7 +269,7 @@ class JudgeAgent:
 
         # settings for saving files
         self.save_dir = save_dir
-        self.save_path = os.path.join(save_dir, "evaluation_results.json")
+        self.save_path = result_path
 
 
     # functions for process the response from llms

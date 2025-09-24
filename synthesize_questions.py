@@ -1,6 +1,6 @@
 import os
 import random
-from typing import List, Dict, Any
+from typing import List, Dict
 
 from JudgeAgent import *
 
@@ -13,6 +13,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default="MedQA")
     parser.add_argument("--model", type=str, default="gpt")
+    parser.add_argument("--random_seed", type=int, default=42)
     parser.add_argument("--bs", type=int, default=3, help="the batch size in Benchmark Grading")
     parser.add_argument("--sample_hop", type=int, default=2, help="the max hop in sampling.")
     parser.add_argument("--max_extend_round", type=int, default=3, help="the max rounds for expanding")
@@ -25,6 +26,7 @@ if __name__ == "__main__":
     max_extend_rounds: int = args.max_extend_rounds
     no_graph: bool = args.no_graph
     fix_difficulty: str = args.fix_difficulty
+    set_random_seed(args.random_seed)
 
     if data_name in ["MedQA"]:
         question_type = QTYPE.KMC
@@ -80,7 +82,7 @@ if __name__ == "__main__":
     else:
         save_postfix += f"_hop{sample_hop}"
     if fix_difficulty:
-        save_postfix += "_fd"
+        save_postfix += f"_fd-{fix_difficulty}"
     save_path = os.path.join(data_dir, f"syn_questions_{data_name}_rnd{max_extend_rounds}_bs{batch_size}{save_postfix}.json")
     syn_questions: List[List[Dict[str, Dict]]] = load_json(save_path) if os.path.exists(save_path) else []
     
