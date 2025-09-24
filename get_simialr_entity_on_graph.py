@@ -19,7 +19,9 @@ if __name__ == "__main__":
     data_dir = os.path.join("processed_data", data_name)
     graph = Graph(data_dir)
 
-    question_with_entities: List[Dict] = load_json(os.path.join(data_dir, "question_with_entities.json"))
+    question_path = os.path.join(data_dir, "question_with_entities.json")
+    save_path = os.path.join(data_dir, "questions_for_eval.json")
+    question_with_entities: List[Dict] = load_json(question_path)
 
     client = EmbeddingClient(save_dir=os.path.join(data_dir, "embeddings"))
     print("# Finish Load Graph and Embeddings")
@@ -67,4 +69,4 @@ if __name__ == "__main__":
                 entities_on_graph.append({"name": node.name, "type": node.type})
             qdata["entities"] = entities_on_graph
             question_with_entities_on_graph.append(qdata)
-    dump_json(question_with_entities_on_graph, os.path.join(data_dir, "questions_for_eval.json"))
+    dump_json(question_with_entities_on_graph, save_path)

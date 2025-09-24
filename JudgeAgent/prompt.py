@@ -118,7 +118,7 @@ As an interviewer, you are tasked with designing multiple-choice style questions
 **Example**: 
 {example}
 
-Please generate a multiple-choice question according to the above requirements, referring to the sample format, and based on the given text fragments, output in the following specified JSON format:
+Please generate a multiple-choice question for each difficulty level according to the above requirements, referring to the sample format, and based on the given text fragments, output in the following specified JSON format:
 - **Text Fragments**: 
 {context}
 - **Generated Questions**:
@@ -154,14 +154,21 @@ As an interviewer, you are tasked with designing phrase-based Q&A style question
 **Example**: 
 {example}
 
-Please generate a phrase-based Q&A question according to the above requirements, referring to the sample format, and based on the given text fragments, output in the following specified JSON format:
+Please generate a phrase-based Q&A question for each difficulty level according to the above requirements, referring to the sample format, and based on the given text fragments, output in the following specified JSON format:
 - **Text Fragments**: 
 {context}
 - **Generated Questions**:
 {{
     "generated_question": {{
-        "question": "Generated Question", 
-        "answer": "Correct Answer"
+        "easy": {{
+            "question": "Generated question-easy level", 
+            "answer": "Correct Answer"
+        }}, 
+        "medium": {{
+            "question": "Generated question-medium level", 
+            ...
+        }}, 
+        "hard": ...
     }}
 }}
 """.strip()
@@ -372,7 +379,8 @@ class PromptFiller:
         if prompt_type in [PTYPE.SOG, PTYPE.SOG_FULL_DIFFICULTY]:
             example = data.get("example", self.default_example_dict[question_type])
             context = data["context"]
-            difficulty = data.get("difficulty", None)
+            difficulty = data.get("difficulty", "")
+            difficulty = "3. " + DIFFICULTY[difficulty] if difficulty else difficulty
             prompt = prompt_template.format(difficulty=difficulty, example=example, context=context)
         elif prompt_type in [PTYPE.ANSWER, PTYPE.REANSWER]:
             article = data.get("article", None)

@@ -23,7 +23,7 @@ def split_chunks_MedQA(data_dir: str, save_dir: str):
         for f in files:
             area = f.replace(".txt", "").replace("_", " ").lower()
             paragraphs = load_text(os.path.join(text_dir))
-            chunks = []
+            chunks: List[str] = []
             for paragraph in paragraphs:
                 if len(paragraph.split()) > 5:
                     chunks.append(paragraph)
@@ -170,6 +170,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default="MedQA")
     parser.add_argument("--random_seed", type=int, default=42)
+    parser.add_argument("--bs", type=int, default=3, help="the batch size in Benchmark Grading, only useful for QuALITY in this code.")
     args = parser.parse_args()
     data_name: str = args.data
     set_random_seed(args.random_seed)
@@ -183,6 +184,6 @@ if __name__ == "__main__":
         split_chunks_MultiHopRAG(data_dir, save_dir)
         process_questions_MultiHopRAG(os.path.join(data_dir, "MultiHopRAG.json"), save_dir)
     elif data_name.lower() == "quality":
-        process_data_QuALITY(data_dir, save_dir)
+        process_data_QuALITY(data_dir, save_dir, args.bs)
     else:
         raise ValueError(f"The process of {data_name} is not supported now, please write the code yourself first.")

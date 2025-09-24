@@ -1,5 +1,4 @@
 from typing import List, Dict, Set
-from tqdm import tqdm
 
 from JudgeAgent.label_entity import Entity, label_entity_for_batch
 from JudgeAgent import *
@@ -66,6 +65,7 @@ if __name__ == "__main__":
 
     client = LLMClient(MODEL_PARAMS[args.model])
 
+    from tqdm import tqdm
     with tqdm(total=len(batches), desc="label entity") as pbar:
         pbar.update(index["index"])
 

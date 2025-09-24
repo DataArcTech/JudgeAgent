@@ -1,5 +1,4 @@
 import os
-from tqdm import tqdm
 from typing import List, Dict
 
 from JudgeAgent import *
@@ -24,6 +23,7 @@ if __name__ == "__main__":
 
     client = LLMClient(MODEL_PARAMS[args.model])
     
+    from tqdm import tqdm
     with tqdm(total=len(questions), desc="label entity on question") as pbar:
         index = len(question_with_entities)
         pbar.update(index)
