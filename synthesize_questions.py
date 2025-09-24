@@ -82,7 +82,7 @@ if __name__ == "__main__":
     if fix_difficulty:
         save_postfix += "_fd"
     save_path = os.path.join(data_dir, f"syn_questions_{data_name}_rnd{max_extend_rounds}_bs{batch_size}{save_postfix}.json")
-    syn_questions: List[List[Dict]] = load_json(save_path) if os.path.exists(save_path) else []
+    syn_questions: List[List[Dict[str, Dict]]] = load_json(save_path) if os.path.exists(save_path) else []
     
 
     from tqdm import tqdm
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             else:
                 example: str = None
 
-            questions: List[Dict[str, Any]] = []
+            questions: List[Dict[str, Dict]] = []
             if no_graph:
                 # if no context graph, randomly sample texts from the original knowlege base
                 for _ in max_extend_rounds:
@@ -113,8 +113,9 @@ if __name__ == "__main__":
                     if fix_difficulty:
                         temp_questions: Dict[str, Dict] = {d: None for d in ["easy", "medium", "hard"]}
                         temp_questions[fix_difficulty] = round_questions
-                        round_questions = temp_questions
-                    questions.append(round_questions)
+                    else:
+                        temp_questions: Dict[str, Dict] = round_questions
+                    questions.append(temp_questions)
             else:
                 questions = judge_agent.synthetize_questions_multi_rounds(
                     seed_questions=batch, 
