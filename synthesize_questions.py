@@ -91,6 +91,7 @@ if __name__ == "__main__":
         pbar.update(index)
 
         for batch in question_batches[index : ]:
+            # get example for question generation
             if data_name in ["QuALITY"]:
                 example = judge_agent.generate_example_text(batch, fix_difficulty)
             else:
@@ -98,6 +99,7 @@ if __name__ == "__main__":
 
             questions: List[Dict[str, Any]] = []
             if no_graph:
+                # if no context graph, randomly sample texts from the original knowlege base
                 for _ in max_extend_rounds:
                     text_fragments = random.sample(chunks, batch_size)
                     fragments = [f"Text Fragment {i+1}: {text}" for i, text in enumerate(text_fragments)]
@@ -121,6 +123,7 @@ if __name__ == "__main__":
                     difficulty=fix_difficulty
                 )
             
+            # temporarily save synthetized questions
             syn_questions.append(questions)
             dump_json(syn_questions, save_path)
             pbar.update(1)
